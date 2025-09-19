@@ -206,6 +206,10 @@ public class CountryCodePickerViewController: UITableViewController {
     }
 
     override public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard !hasLimitedCountries else {
+            return nil
+        }
+
         if isFiltering {
             return nil
         } else if section == 0, hasCurrent {
