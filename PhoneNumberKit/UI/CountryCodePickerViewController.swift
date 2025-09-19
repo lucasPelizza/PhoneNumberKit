@@ -23,16 +23,28 @@ public class CountryCodePickerViewController: UITableViewController {
     public let options: CountryCodePickerOptions
 
     let commonCountryCodes: [String]
+    let limitedCountries: [String]
 
     var shouldRestoreNavigationBarToHidden = false
 
     var hasCurrent = true
     var hasCommon = true
+    var hasLimitedCountries: Bool {
+        !limitedCountries.isEmpty
+    }
 
-    lazy var allCountries = utility
-        .allCountries()
-        .compactMap({ Country(for: $0, with: self.utility) })
-        .sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
+    var allCountries: [Country] {
+        guard !hasLimitedCountries else {
+            return limitedCountries
+                .compactMap({ Country(for: $0, with: self.utility) })
+                .sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
+        }
+
+        return utility
+            .allCountries()
+            .compactMap({ Country(for: $0, with: self.utility) })
+            .sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
+    }
 
     lazy var countries: [[Country]] = {
         let countries = allCountries
@@ -77,9 +89,12 @@ public class CountryCodePickerViewController: UITableViewController {
     public init(
         utility: PhoneNumberUtility,
         options: CountryCodePickerOptions?,
-        commonCountryCodes: [String] = CountryCodePicker.commonCountryCodes) {
+        commonCountryCodes: [String] = CountryCodePicker.commonCountryCodes,
+        limitedCountries: [String] = CountryCodePicker.limitedCountryCodes
+    ) {
         self.utility = utility
         self.commonCountryCodes = commonCountryCodes
+        self.limitedCountries = limitedCountries
         self.options = options ?? CountryCodePickerOptions()
         super.init(style: .grouped)
         self.commonInit()
@@ -88,6 +103,7 @@ public class CountryCodePickerViewController: UITableViewController {
     required init?(coder aDecoder: NSCoder) {
         self.utility = PhoneNumberUtility()
         self.commonCountryCodes = CountryCodePicker.commonCountryCodes
+        self.limitedCountries = CountryCodePicker.limitedCountryCodes
         self.options = CountryCodePickerOptions()
         super.init(coder: aDecoder)
         self.commonInit()

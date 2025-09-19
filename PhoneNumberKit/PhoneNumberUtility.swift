@@ -352,6 +352,9 @@ public enum CountryCodePicker {
     /// Common Country Codes are shown below the Current section in the CountryCodePicker by default
     public static var commonCountryCodes: [String] = []
 
+    /// Limited the Country Codes shown on the CountryCodePicker
+    public static var limitedCountryCodes: [String] = []
+
     /// When the Picker is shown from the textfield it is presented modally
     public static var forceModalPresentation: Bool = false
 
