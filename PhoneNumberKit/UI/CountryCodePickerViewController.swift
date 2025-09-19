@@ -50,6 +50,14 @@ public class CountryCodePickerViewController: UITableViewController {
         let countries = allCountries
             .reduce([[Country]]()) { collection, country in
                 var collection = collection
+
+                guard self.hasLimitedCountries else {
+                    guard var lastGroup = collection.last else { return [[country]] }
+                    lastGroup.append(country)
+                    collection[collection.count - 1] = lastGroup
+                    return collection
+                }
+
                 guard var lastGroup = collection.last else { return [[country]] }
                 let lhs = lastGroup.first?.name.folding(options: .diacriticInsensitive, locale: nil)
                 let rhs = country.name.folding(options: .diacriticInsensitive, locale: nil)
@@ -223,6 +231,10 @@ public class CountryCodePickerViewController: UITableViewController {
     }
 
     override public func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+        guard !hasLimitedCountries else {
+            return nil
+        }
+
         guard !isFiltering else {
             return nil
         }
