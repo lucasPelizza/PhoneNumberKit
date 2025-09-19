@@ -70,6 +70,8 @@ public class CountryCodePickerViewController: UITableViewController {
                 return collection
             }
 
+        guard !self.hasLimitedCountries else { return countries }
+
         let popular = commonCountryCodes.compactMap({ Country(for: $0, with: utility) })
 
         var result: [[Country]] = []
