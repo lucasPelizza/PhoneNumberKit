@@ -545,6 +545,7 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
     private func addDropdownIndicator() {
         guard !flagContent.arrangedSubviews.contains(where: { self.dropDownImage == $0 }) else { return }
 
+        dropDownImage.isHidden = false
         if #available(iOS 13.0, *) {
             self.dropDownImage.image = UIImage(systemName: "chevron.down")!
             self.dropDownImage.tintColor = .black
@@ -562,7 +563,10 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
     }
 
     private func removeDropdownIndicator() {
-        flagContent.removeArrangedSubview(flagContent)
+        guard flagContent.arrangedSubviews.contains(where: { self.dropDownImage == $0 }) else { return }
+
+        dropDownImage.isHidden = true
+        flagContent.removeArrangedSubview(dropDownImage)
         flagContent.removeArrangedSubview(spaceView)
     }
 
