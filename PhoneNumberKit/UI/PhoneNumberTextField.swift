@@ -17,6 +17,7 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
 
     public lazy var flagContent = UIStackView()
     public lazy var flagButton = UIButton()
+    public lazy var spaceView = UIView()
     public lazy var dropDownImage = UIImageView()
 
     /// Override setText so number will be automatically formatted when setting text by code
@@ -34,6 +35,14 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
         get {
             return super.text
         }
+    }
+
+    override open var textColor: UIColor? {
+        set {
+            super.textColor = newValue
+            dropDownImage.tintColor = newValue
+        }
+        get { super.textColor }
     }
 
     /// allows text to be set without formatting
@@ -132,6 +141,12 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
                 let tap = UITapGestureRecognizer(target: self, action: #selector(didPressFlagButton))
                 flagContent.addGestureRecognizer(tap)
             }
+
+            if _withDefaultPickerUI {
+                addDropdownIndicator()
+            } else {
+                removeDropdownIndicator()
+            }
         }
     }
 
@@ -222,11 +237,6 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
         if self.withFlag { // update the width of the flagButton automatically, iOS <13 doesn't handle this for you
             let width = self.flagButton.systemLayoutSizeFitting(bounds.size).width
             self.flagButton.frame.size.width = width
-//            self.flagButton.backgroundColor = .red
-//            self.flagContent.backgroundColor = .blue
-//            self.dropDownImage.backgroundColor = .yellow
-//            let contentWidth = self.flagContent.systemLayoutSizeFitting(bounds.size).width
-//            self.flagContent.frame.size.width = contentWidth
         }
         super.layoutSubviews()
     }
@@ -306,25 +316,26 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
     func setup() {
         self.autocorrectionType = .no
         self.keyboardType = .phonePad
-        if #available(iOS 13.0, *){
-            self.dropDownImage.image = UIImage(systemName: "chevron.down")!
-            self.dropDownImage.tintColor = .black
-            self.dropDownImage.contentMode = .scaleAspectFit
+        self.flagContent.addArrangedSubview(flagButton)
+        self.flagContent.spacing = 4
+        self.flagContent.axis = .horizontal
+
+        if _withDefaultPickerUI {
+            if #available(iOS 13.0, *) {
+                self.dropDownImage.image = UIImage(systemName: "chevron.down")!
+                self.dropDownImage.tintColor = .black
+                self.dropDownImage.contentMode = .scaleAspectFit
+            }
+
+            self.dropDownImage.frame = CGRect(x: 0, y: 0, width: 8, height: 8)
+            self.flagContent.addArrangedSubview(dropDownImage)
+            self.spaceView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                spaceView.widthAnchor.constraint(equalToConstant: 3),
+                spaceView.heightAnchor.constraint(equalToConstant: 18)
+            ])
+            self.flagContent.addArrangedSubview(self.spaceView)
         }
-        self.dropDownImage.frame = CGRect(x: 0, y: 0, width: 8, height: 8)
-
-        flagContent.spacing = 4
-        flagContent.axis = .horizontal
-        flagContent.addArrangedSubview(flagButton)
-        flagContent.addArrangedSubview(dropDownImage)
-        let spaceView = UIView()
-        spaceView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            spaceView.widthAnchor.constraint(equalToConstant: 3),
-            spaceView.heightAnchor.constraint(equalToConstant: 18)
-        ])
-        flagContent.addArrangedSubview(spaceView)
-
 
         super.delegate = self
     }
@@ -529,6 +540,30 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
         }
 
         return false
+    }
+
+    private func addDropdownIndicator() {
+        guard !flagContent.arrangedSubviews.contains(where: { self.dropDownImage == $0 }) else { return }
+
+        if #available(iOS 13.0, *) {
+            self.dropDownImage.image = UIImage(systemName: "chevron.down")!
+            self.dropDownImage.tintColor = .black
+            self.dropDownImage.contentMode = .scaleAspectFit
+        }
+        self.dropDownImage.frame = CGRect(x: 0, y: 0, width: 8, height: 8)
+
+        flagContent.addArrangedSubview(dropDownImage)
+        spaceView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            spaceView.widthAnchor.constraint(equalToConstant: 3),
+            spaceView.heightAnchor.constraint(equalToConstant: 18)
+        ])
+        flagContent.addArrangedSubview(spaceView)
+    }
+
+    private func removeDropdownIndicator() {
+        flagContent.removeArrangedSubview(flagContent)
+        flagContent.removeArrangedSubview(spaceView)
     }
 
     // MARK: UITextfield Delegate
