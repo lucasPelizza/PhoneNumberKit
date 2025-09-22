@@ -51,7 +51,7 @@ public class CountryCodePickerViewController: UITableViewController {
             .reduce([[Country]]()) { collection, country in
                 var collection = collection
 
-                guard self.hasLimitedCountries else {
+                guard !self.hasLimitedCountries else {
                     guard var lastGroup = collection.last else { return [[country]] }
                     lastGroup.append(country)
                     collection[collection.count - 1] = lastGroup
@@ -67,6 +67,7 @@ public class CountryCodePickerViewController: UITableViewController {
                 } else {
                     collection.append([country])
                 }
+
                 return collection
             }
 

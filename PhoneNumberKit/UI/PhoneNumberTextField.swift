@@ -15,7 +15,9 @@ import UIKit
 open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
     public let utility: PhoneNumberUtility
 
+    public lazy var flagContent = UIStackView()
     public lazy var flagButton = UIButton()
+    public lazy var dropDownImage = UIImageView()
 
     /// Override setText so number will be automatically formatted when setting text by code
     override open var text: String? {
@@ -77,7 +79,7 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
 
     public var withFlag: Bool = false {
         didSet {
-            leftView = self.withFlag ? self.flagButton : nil
+            leftView = self.withFlag ? self.flagContent : nil
             leftViewMode = self.withFlag ? .always : .never
             self.updateFlag()
         }
@@ -125,6 +127,10 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
         didSet {
             if flagButton.actions(forTarget: self, forControlEvent: .touchUpInside) == nil {
                 flagButton.addTarget(self, action: #selector(didPressFlagButton), for: .touchUpInside)
+
+                flagContent.isUserInteractionEnabled = true
+                let tap = UITapGestureRecognizer(target: self, action: #selector(didPressFlagButton))
+                flagContent.addGestureRecognizer(tap)
             }
         }
     }
@@ -145,7 +151,7 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
             self.partialFormatter.maxDigits = self.maxDigits
         }
     }
-    
+
     public var ofType: PhoneNumberType = .mobile {
         didSet {
             if self.withExamplePlaceholder {
@@ -216,6 +222,11 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
         if self.withFlag { // update the width of the flagButton automatically, iOS <13 doesn't handle this for you
             let width = self.flagButton.systemLayoutSizeFitting(bounds.size).width
             self.flagButton.frame.size.width = width
+//            self.flagButton.backgroundColor = .red
+//            self.flagContent.backgroundColor = .blue
+//            self.dropDownImage.backgroundColor = .yellow
+//            let contentWidth = self.flagContent.systemLayoutSizeFitting(bounds.size).width
+//            self.flagContent.frame.size.width = contentWidth
         }
         super.layoutSubviews()
     }
@@ -295,6 +306,26 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
     func setup() {
         self.autocorrectionType = .no
         self.keyboardType = .phonePad
+        if #available(iOS 13.0, *){
+            self.dropDownImage.image = UIImage(systemName: "chevron.down")!
+            self.dropDownImage.tintColor = .black
+            self.dropDownImage.contentMode = .scaleAspectFit
+        }
+        self.dropDownImage.frame = CGRect(x: 0, y: 0, width: 8, height: 8)
+
+        flagContent.spacing = 4
+        flagContent.axis = .horizontal
+        flagContent.addArrangedSubview(flagButton)
+        flagContent.addArrangedSubview(dropDownImage)
+        let spaceView = UIView()
+        spaceView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            spaceView.widthAnchor.constraint(equalToConstant: 3),
+            spaceView.heightAnchor.constraint(equalToConstant: 18)
+        ])
+        flagContent.addArrangedSubview(spaceView)
+
+
         super.delegate = self
     }
 
@@ -322,7 +353,7 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
             .compactMap { UnicodeScalar(flagBase + $0.value)?.description }
             .joined()
 
-        self.flagButton.setTitle(flag + " ", for: .normal)
+        self.flagButton.setTitle(flag + "", for: .normal)
         self.flagButton.accessibilityLabel = NSLocalizedString(
             "PhoneNumberKit.CountryCodePickerEntryButton.AccessibilityLabel",
             value: "Select your country code",
