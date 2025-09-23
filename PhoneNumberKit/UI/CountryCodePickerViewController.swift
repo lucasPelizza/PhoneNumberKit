@@ -37,7 +37,6 @@ public class CountryCodePickerViewController: UITableViewController {
         guard !hasLimitedCountries else {
             return limitedCountries
                 .compactMap({ Country(for: $0, with: self.utility) })
-                .sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
         }
 
         return utility
