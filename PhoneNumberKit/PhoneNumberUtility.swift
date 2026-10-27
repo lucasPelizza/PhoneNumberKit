@@ -360,5 +360,9 @@ public enum CountryCodePicker {
 
     /// Set the search bar of the Picker to always visible
     public static var alwaysShowsSearchBar: Bool = false
+
+    /// Locale used to localize and sort the country names shown in the CountryCodePicker.
+    /// Defaults to `.current`; set it when the app language is chosen independently of the device locale.
+    public static var displayLocale: Locale = .current
 }
 #endif

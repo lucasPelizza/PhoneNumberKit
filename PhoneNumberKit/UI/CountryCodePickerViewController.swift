@@ -42,7 +42,14 @@ public class CountryCodePickerViewController: UITableViewController {
         return utility
             .allCountries()
             .compactMap({ Country(for: $0, with: self.utility) })
-            .sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
+            .sorted(by: {
+                $0.name.compare(
+                    $1.name,
+                    options: [.caseInsensitive, .diacriticInsensitive],
+                    range: nil,
+                    locale: CountryCodePicker.displayLocale
+                ) == .orderedAscending
+            })
     }
 
     lazy var countries: [[Country]] = {
@@ -293,7 +300,7 @@ public extension CountryCodePickerViewController {
         public init?(for countryCode: String, with utility: PhoneNumberUtility) {
             let flagBase = UnicodeScalar("🇦").value - UnicodeScalar("A").value
             guard
-                let name = (Locale.current as NSLocale).localizedString(forCountryCode: countryCode),
+                let name = (CountryCodePicker.displayLocale as NSLocale).localizedString(forCountryCode: countryCode),
                 let prefix = utility.countryCode(for: countryCode)?.description
             else {
                 return nil
